@@ -167,7 +167,6 @@ or controller gains are changed. Raw camera streams and timestamps remain in
 the output directory. The composed video plays at one simulation second per
 video second, followed by a three-second final-frame summary.
 
-Recordings and run outputs are generated locally and excluded from Git.
 
 Official sources
 ----------------
