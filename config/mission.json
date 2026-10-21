@@ -1,0 +1,16 @@
+{
+  "depth": 5.0,
+  "line_y": [0.0, 2.0, 4.0, 6.0, 8.0],
+  "line_length": 8.0,
+  "speed": 0.28,
+  "robot_radius": 0.35,
+  "obstacle_radius": 0.25,
+  "safety_margin": 0.30,
+  "grid_resolution": 0.10,
+  "goal_tolerance": 0.10,
+  "scan_timeout": 0.5,
+  "max_duration": 900.0,
+  "sonar_offset": [0.25, 0.0, -0.095],
+  "sonar_range_bias": 0.1,
+  "sonar_detection_range": 4.0
+}
