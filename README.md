@@ -11,7 +11,7 @@
 | Rendering | EGL/OpenGL support for Ogre2 GPU sensors, including headless runs |
 | Vehicle model | `bluerov2_gz` at commit `4451a5d1b15d204581d43ef7d93df4a0508eddbb` |
 | Numerical libraries | NumPy, SciPy, Matplotlib |
-| Report export | Pillow, DejaVu fonts, Pandoc, python-docx |
+| Video composition | Pillow, DejaVu fonts |
 | Camera capture | FFmpeg, `gz.transport13`, `gz.msgs10` Python bindings |
 
 Use `config/mission.json` for depth, survey lines, speed, safety margin and sensor settings. Use `config/scenario.json`, `config/scenario_calm.json` or `config/scenario_strong_current.json` for the world, obstacles and current. ROS/Gazebo topic mappings are in `config/bridge.yaml`.
@@ -37,12 +37,11 @@ git -C vendor/bluerov2_gz checkout 4451a5d1b15d204581d43ef7d93df4a0508eddbb
 python3 -m pytest -q
 ```
 
-For report export, scene capture and video recording, enable the [official Gazebo APT repository](https://gazebosim.org/docs/harmonic/install_ubuntu/) and install:
+For video recording, enable the [official Gazebo APT repository](https://gazebosim.org/docs/harmonic/install_ubuntu/) and install:
 
 ```bash
 sudo apt update
-sudo apt install -y pandoc python3-docx libreoffice-writer libreoffice-math \
-  ffmpeg python3-gz-transport13 python3-gz-msgs10 poppler-utils
+sudo apt install -y ffmpeg python3-gz-transport13 python3-gz-msgs10
 ```
 
 An optional ROS package build requires `python3-colcon-common-extensions`:

@@ -5,9 +5,8 @@ Target environment: Ubuntu 24.04 (Noble), system Python 3.12, ROS 2 Jazzy,
 Gazebo Harmonic. The recorded experiments used Gazebo Sim 8.11.0. Installing
 the current packages can select a newer compatible Harmonic patch version;
 check the run manifest when comparing results. These instructions follow the
-official sources below. A separate clean-machine installation was not executed
-for the report revision; the existing workstation, package build and saved
-experiment checks were tested.
+official sources below. A separate clean-machine installation was not executed;
+the existing workstation, package build and saved experiment checks were tested.
 
 1. Install ROS and simulation dependencies
 ------------------------------------------
@@ -33,8 +32,7 @@ is resolved from the official ros-infrastructure repository::
     sudo apt update
     sudo apt install -y ros-jazzy-ros-base ros-jazzy-ros-gz \
       python3-colcon-common-extensions python3-numpy python3-scipy \
-      python3-matplotlib python3-pytest python3-pil python3-docutils \
-      poppler-utils
+      python3-matplotlib python3-pytest python3-pil fonts-dejavu-core
     source /opt/ros/jazzy/setup.bash
 
 The ROS vendor packages provide the supported Jazzy/Harmonic pairing. No
@@ -43,14 +41,12 @@ rclpy plus standard ROS messages. Use the system Python packages so that rclpy
 and its binary dependencies remain visible; no pip installation into the system
 interpreter is needed. ``requirements.txt`` lists the core Python requirements.
 
-Scene recapture is optional and is separate from mission execution and report
-rebuilding. ``scripts/capture_report_scene.py`` additionally uses Gazebo Python
-bindings ``gz.transport13`` and ``gz.msgs10``. They were available on the tested
-machine as ``python3-gz-transport13`` and ``python3-gz-msgs10``. If absent, install
-them from the official Gazebo Harmonic repository following its installation
-documentation, or keep the supplied scene images. The report builder does not
-need these bindings. Ogre2 GPU sensors require a functioning EGL/OpenGL renderer;
-headless mode removes the window, not the rendering requirement.
+Optional video recording uses Gazebo Python bindings ``gz.transport13`` and
+``gz.msgs10``. They were available on the tested machine as
+``python3-gz-transport13`` and ``python3-gz-msgs10``. If absent, enable the official
+Gazebo Harmonic APT repository following its installation documentation, then
+install the packages listed in Section 5. Ogre2 GPU sensors require a functioning
+EGL/OpenGL renderer; headless mode removes the window, not the rendering requirement.
 
 2. Source checkout and optional ROS package build
 -------------------------------------------------
@@ -65,7 +61,7 @@ commit. The expected revision is
     git clone https://github.com/clydemcqueen/bluerov2_gz.git vendor/bluerov2_gz
     git -C vendor/bluerov2_gz checkout 4451a5d1b15d204581d43ef7d93df4a0508eddbb
 
-Do not clone over the already supplied vendor directory. Verify and test::
+Skip the clone command if the vendor checkout already exists. Verify and test::
 
     source /opt/ros/jazzy/setup.bash
     gz sim --versions
@@ -88,8 +84,8 @@ three processes and invokes ``python3 -m rov_survey.node`` itself.
 3. Generate the world and run experiments
 -----------------------------------------
 
-The original primary world is ``results/current/world.sdf``. A world-only build
-is useful for inspecting model changes::
+Each run saves its generated ``world.sdf`` under the output directory. A
+world-only build is useful for inspecting model changes::
 
     python3 scripts/prepare_world.py --scenario config/scenario.json \
       --output worlds/survey.sdf
@@ -121,8 +117,8 @@ is read by world construction and offline evaluation. Each output directory
 contains the generated SDF, configuration snapshots, manifest, raw scans,
 telemetry, plans, mission events and process logs.
 
-4. Evaluate and rebuild
------------------------
+4. Evaluate and verify
+----------------------
 
 For newly recorded runs::
 
@@ -132,69 +128,27 @@ For newly recorded runs::
     python3 scripts/check_results.py \
       results/repeat_current results/repeat_calm results/repeat_strong
 
-For the original assignment archive, the reports can be rebuilt from its saved
-experiments::
-
-    python3 scripts/build_report.py \
-      --runs results/current results/calm results/strong_current
-
 The Git checkout excludes saved runs. Use the fresh-run commands in
-``README.md`` to recreate them, and run ``scripts/capture_report_scene.py``
-before building the report to generate its scene images.
+``README.md`` to recreate them.
 
 ``check_results.py`` checks exact source-file hashes. Comment and docstring
 cleanup changes those hashes even when executable code is unchanged. Use this
-check on runs produced by the current checkout. Historical manifests in the
-assignment archive retain the hashes of their original source version.
-
-The report includes explanatory snapshots at times selected for the supplied
-primary run. Replacing the experiment set requires reviewing those narrative
-examples and the scene provenance as well as rebuilding computed tables. Do not
-treat a regenerated PDF for an arbitrary new layout as a fully reviewed report.
+check on runs produced by the current checkout. Historical manifests retain the
+hashes of their original source version.
 
 ``scripts/evaluate.py`` recomputes metrics and original diagnostic plots from
-raw logs. ``scripts/report_evidence.py`` derives extra coverage classifications,
-first-detection diagnostics and controller replay, writes source hashes, and
-exports vector/300 dpi figures. ``build_report.py`` calls that analysis, renders
-the final PDF directly with vector graphics and writes the editable RST source.
-The saved source hashes provide a basis for checking original log integrity.
+raw logs. ``scripts/check_results.py`` performs 12 consistency and acceptance
+checks for each run, including exact source-file hashes and mission completion.
 
-The existing revision verification outputs are:
+5. Video recording
+------------------
 
-* ``results/report_evidence/tests.txt``: seven named pytest checks.
-* ``results/report_evidence/validation.txt`` and ``results/validation.json``:
-  12 consistency/acceptance checks for each of three runs.
-* ``results/report_evidence/analysis.json``: numerical derived evidence and hashes.
+After enabling the official Gazebo Harmonic APT repository, install the optional
+MP4 capture and composition dependencies::
 
-Official sources
-----------------
-
-* `ROS 2 Jazzy Ubuntu installation <https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html>`_
-* `Official ROS installation source <https://github.com/ros2/ros2_documentation/blob/jazzy/source/Installation/Ubuntu-Install-Debs.rst>`_
-* `Gazebo Harmonic with ROS <https://gazebosim.org/docs/harmonic/ros_installation/>`_
-* `Gazebo Harmonic Ubuntu installation <https://gazebosim.org/docs/harmonic/install_ubuntu/>`_
-
-5. Editable Word report and video recording
--------------------------------------------
-
-Optional tools for Word generation, preview and MP4 capture::
-
-    sudo apt install -y pandoc python3-docx libreoffice-writer libreoffice-math ffmpeg
-
-The current workstation uses workspace-local unpacked document tools in
-``tools/``; these are excluded from the submission archive. A standard package
-installation supplies the same interfaces. Run the shared content generator
-before exporting Word, particularly after moving the project to another path::
-
-    python3 scripts/build_report.py
-    python3 scripts/build_report_word.py
-
-``report_content.json`` is the shared text/table/equation source. Word contains
-native Office Math equations and editable tables. ``report.pdf`` retains the
-vector renderer; ``docs/word_preview/report.pdf`` is an actual Word rendering
-used to check pagination and formulas. Standard LibreOffice preview command::
-
-    libreoffice --headless --convert-to pdf --outdir docs/word_preview docs/report.docx
+    sudo apt update
+    sudo apt install -y ffmpeg python3-gz-transport13 python3-gz-msgs10 \
+      python3-pil fonts-dejavu-core
 
 Record a new full mission with two Gazebo rendering sensors (requires the
 Gazebo Python bindings discussed in Section 1)::
@@ -202,6 +156,7 @@ Gazebo Python bindings discussed in Section 1)::
     source /opt/ros/jazzy/setup.bash
     python3 scripts/record_mission.py --output results/video_repeat
     python3 scripts/evaluate.py results/video_repeat
+    python3 scripts/check_results.py results/video_repeat
     python3 scripts/compose_mission_video.py --run results/video_repeat \
       --output videos/repeat.mp4
 
@@ -212,6 +167,12 @@ or controller gains are changed. Raw camera streams and timestamps remain in
 the output directory. The composed video plays at one simulation second per
 video second, followed by a three-second final-frame summary.
 
-The supplied recording is ``results/video_run_20261021`` and is separate from
-the three original quantitative experiments. Rebuild the submission archive
-with ``python3 scripts/package_submission.py`` after updating deliverables.
+Recordings and run outputs are generated locally and excluded from Git.
+
+Official sources
+----------------
+
+* `ROS 2 Jazzy Ubuntu installation <https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html>`_
+* `Official ROS installation source <https://github.com/ros2/ros2_documentation/blob/jazzy/source/Installation/Ubuntu-Install-Debs.rst>`_
+* `Gazebo Harmonic with ROS <https://gazebosim.org/docs/harmonic/ros_installation/>`_
+* `Gazebo Harmonic Ubuntu installation <https://gazebosim.org/docs/harmonic/install_ubuntu/>`_

@@ -14,6 +14,16 @@ __pycache__/
 /docs/revisions/
 /docs/word_preview/
 /docs/report_content.json
+/docs/report.*
+/docs/figures/
+/docs/review_response*.rst
+/scripts/build_report.py
+/scripts/build_report_word.py
+/scripts/report_layout.py
+/scripts/report_evidence.py
+/scripts/capture_report_scene.py
+/scripts/package_submission.py
+/Assignment1.pdf
 /worlds/survey.sdf
 /.agents/
 /.aws/
