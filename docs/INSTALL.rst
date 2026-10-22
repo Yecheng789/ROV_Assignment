@@ -140,6 +140,14 @@ hashes of their original source version.
 raw logs. ``scripts/check_results.py`` performs 12 consistency and acceptance
 checks for each run, including exact source-file hashes and mission completion.
 
+For the archived experiment dataset, follow the download and checksum commands
+in ``README.md`` and evaluate copies of the extracted runs. Use
+``scripts/check_results.py --data-only`` for these copies: it performs the 11
+data checks and explicitly marks the source-hash comparison as skipped.
+The acquisition hashes remain unchanged and differ from the current checkout
+after source cleanup. The default verification mode retains the source-hash
+requirement for new runs.
+
 5. Video recording
 ------------------
 

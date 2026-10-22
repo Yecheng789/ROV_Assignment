@@ -10,7 +10,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def check(directory):
+def check(directory, data_only=False):
     directory = Path(directory)
     metrics = json.loads((directory/"metrics.json").read_text())
     manifest = json.loads((directory/"manifest.json").read_text())
@@ -22,10 +22,6 @@ def check(directory):
     finished = [e["name"] for e in events if e["event"] == "leg_completed"]
     expected = ["line_1", "connector", "line_2", "connector", "line_3",
                 "connector", "line_4", "connector", "line_5"]
-    hashes_match = all(
-        hashlib.sha256((ROOT/name).read_bytes()).hexdigest() == value
-        for name, value in manifest["source_sha256"].items()
-        if name.startswith("rov_survey/") and name.endswith(".py"))
     checks = {
         "mission_completed": metrics["completed"],
         "nine_leg_events_in_order": finished == expected,
@@ -38,17 +34,28 @@ def check(directory):
         "max_depth_error_under_0_1m": metrics["depth_max_abs_m"] < .1,
         "thrust_bounds_respected": metrics["max_abs_thruster_N"] <= 18.000001,
         "independent_tracking_matches_node": metrics["max_tracking_log_discrepancy_m"] < 1e-8,
-        "delivered_controller_matches_run_hashes": hashes_match,
     }
+    source_hash_check = "skipped"
+    if not data_only:
+        sources = {name: value for name, value in manifest["source_sha256"].items()
+                   if name.startswith("rov_survey/") and name.endswith(".py")}
+        hashes_match = bool(sources) and all(
+            (ROOT/name).is_file() and hashlib.sha256((ROOT/name).read_bytes()).hexdigest() == value
+            for name, value in sources.items())
+        checks["delivered_controller_matches_run_hashes"] = hashes_match
+        source_hash_check = "passed" if hashes_match else "failed"
     return {"run": str(directory), "passed": all(checks.values()), "checks": checks,
+            "source_hash_check": source_hash_check,
             "max_control_gap_sim_s": float(np.max(np.diff(t)))}
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("runs", type=Path, nargs="+")
+    parser.add_argument("--data-only", action="store_true",
+                        help="Check archived data without comparing acquisition source hashes to this checkout.")
     args = parser.parse_args()
-    audits = [check(run) for run in args.runs]
+    audits = [check(run, data_only=args.data_only) for run in args.runs]
     result = {"passed": all(audit["passed"] for audit in audits), "runs": audits}
     (ROOT/"results/validation.json").write_text(json.dumps(result, indent=2)+"\n")
     print(json.dumps(result, indent=2))

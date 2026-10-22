@@ -23,7 +23,7 @@ Install [ROS 2 Jazzy](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-
 ```bash
 sudo apt update
 sudo apt install -y ros-jazzy-ros-base ros-jazzy-ros-gz \
-  git python3-numpy python3-scipy python3-matplotlib python3-pytest \
+  git curl python3-numpy python3-scipy python3-matplotlib python3-pytest \
   python3-pil fonts-dejavu-core
 source /opt/ros/jazzy/setup.bash
 ```
@@ -67,6 +67,34 @@ python3 scripts/evaluate.py results/calm
 python3 scripts/evaluate.py results/strong_current
 python3 scripts/check_results.py results/current results/calm results/strong_current
 ```
+
+To inspect the three recorded experiments without running Gazebo, download the
+[experiment dataset](https://github.com/Yecheng789/ROV_Assignment/releases/tag/experiment-data-v1).
+Run these commands from the project root, using new extraction and evaluation directories:
+
+```bash
+mkdir -p results/downloads
+curl -fL --retry 3 -o results/downloads/experiment_data.zip \
+  https://github.com/Yecheng789/ROV_Assignment/releases/download/experiment-data-v1/experiment_data.zip
+curl -fL --retry 3 -o results/downloads/experiment_data.zip.sha256 \
+  https://github.com/Yecheng789/ROV_Assignment/releases/download/experiment-data-v1/experiment_data.zip.sha256
+(cd results/downloads && sha256sum -c experiment_data.zip.sha256)
+python3 -m zipfile -e results/downloads/experiment_data.zip results/archived
+(cd results/archived/experiment_data && sha256sum -c SHA256SUMS)
+cp -r results/archived/experiment_data/runs results/reevaluated
+python3 scripts/evaluate.py results/reevaluated/current
+python3 scripts/evaluate.py results/reevaluated/calm
+python3 scripts/evaluate.py results/reevaluated/strong_current
+python3 scripts/check_results.py --data-only \
+  results/reevaluated/current results/reevaluated/calm results/reevaluated/strong_current
+```
+
+The archive retains the original numerical results and acquisition source hashes.
+Its run manifests include only simulation, evaluation and configuration entries;
+retained hashes have not been changed. Later source cleanup changed file hashes.
+`--data-only` performs 11 data checks per run and explicitly skips source-hash
+comparison; the default command above also requires matching source hashes.
+Re-evaluation writes new metrics and plots into the copied directories.
 
 To run with the Gazebo window:
 
