@@ -84,14 +84,14 @@ def main():
             raise RuntimeError("Could not unpause Gazebo.")
         print(f"Run started: {output}", flush=True)
         deadline = time.monotonic()+args.wall_timeout
-        last_report = 0.
+        last_status_update = 0.
         while node.poll() is None:
             if gazebo.poll() is not None or bridge.poll() is not None:
                 raise RuntimeError("Gazebo or bridge exited; inspect logs.")
             if time.monotonic() > deadline:
                 raise TimeoutError("Wall-time deadline exceeded.")
-            if time.monotonic()-last_report > 20 and (output/"status.json").exists():
-                last_report = time.monotonic()
+            if time.monotonic()-last_status_update > 20 and (output/"status.json").exists():
+                last_status_update = time.monotonic()
                 try:
                     s = json.loads((output/"status.json").read_text())
                     print(f"t={s['simulation_time']:.1f}s {s['state']} "

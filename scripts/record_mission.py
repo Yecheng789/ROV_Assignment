@@ -168,7 +168,7 @@ def main():
             time.sleep(.5)
         if not ready: raise RuntimeError('Could not unpause world')
         print(f'Recording Gazebo cameras: {out}',flush=True)
-        deadline=time.monotonic()+1800; last_report=0
+        deadline=time.monotonic()+1800; last_status_update=0
         while time.monotonic()<deadline:
             if gazebo.poll() is not None or bridge.poll() is not None: raise RuntimeError('Gazebo or bridge exited')
             if any(rec.error for rec in recordings): raise RuntimeError('Video encoder failed')
@@ -177,9 +177,9 @@ def main():
             except json.JSONDecodeError:
                 time.sleep(.05); continue
             stamp=status.get('simulation_time',0)
-            if time.monotonic()-last_report>20:
+            if time.monotonic()-last_status_update>20:
                 print(f't={stamp:.1f}s; legs={len(status.get("completed_legs",[]))}/9; camera frames={[r.written for r in recordings]}',flush=True)
-                last_report=time.monotonic()
+                last_status_update=time.monotonic()
             if args.preview_seconds and min(r.last_time or 0 for r in recordings)>=args.preview_seconds:
                 result=0; break
             if controller.poll() is not None:

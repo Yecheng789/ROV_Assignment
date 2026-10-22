@@ -114,7 +114,7 @@ def evaluate(directory):
             "clearance": "Minimum horizontal segment-to-cylinder-center distance minus obstacle radius and 0.35 m vehicle envelope.",
             "completion": "All five alternating line endpoints and four connectors in order, final tolerance 0.10 m, positive conservative clearance.",
             "coverage": "Samples every 0.05 m on each nominal line within 0.25 m of execution during that line; detours reduce nominal coverage.",
-            "planned_length": "Plans are revised online; concatenating full plans double-counts unexecuted portions, so no single total planned length is reported."
+            "planned_length": "Plans are revised online; concatenating full plans double-counts unexecuted portions, so no single total planned length is computed."
         }
     }
     (directory/"metrics.json").write_text(json.dumps(metrics, indent=2)+"\n")

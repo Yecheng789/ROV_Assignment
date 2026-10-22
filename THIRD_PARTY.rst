@@ -3,7 +3,7 @@ Third-party model provenance
 
 Installation places the unmodified upstream repository in ``vendor/bluerov2_gz``.
 This directory is excluded from Git; the installation commands in ``README.md``
-download the pinned revision. The assignment archive includes the local copy.
+download the pinned revision.
 
 * Project: BlueROV2 in Gazebo Harmonic, by Clyde McQueen and contributors.
 * Source: https://github.com/clydemcqueen/bluerov2_gz

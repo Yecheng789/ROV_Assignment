@@ -103,8 +103,7 @@ def main():
           'simulation_start_s':start,'simulation_final_camera_s':times[-1],
           'mission_completion_s':status['simulation_time'],'completed_legs':9,
           'camera_frame_repeats':{k:v['repeated_frames'] for k,v in capture.items()},
-          'overlay_source':'This recording run: telemetry.csv, plans.jsonl and status.json',
-          'report_relation':'Separate demonstration; original three report experiments retained.'}
+          'overlay_source':'This recording run: telemetry.csv, plans.jsonl and status.json'}
     args.output.with_suffix('.json').write_text(json.dumps(meta,indent=2)+'\n')
     print(args.output)
 
